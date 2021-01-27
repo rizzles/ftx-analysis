@@ -1,32 +1,38 @@
 const axios = require('axios');
-const CryptoJS = require('crypto-js');
 require('dotenv').config();
 
-const ts = Date.now();
 const method = 'GET';
-const path = '/markets/BTC-PERP';
+const marketName = 'SUSHI-PERP';
+const resolution = 900; // 15 minute
+const limit = 35;
 
-const main = async () => {
-    const payload = `${ts}${method}${path}`;
-    const signature = CryptoJS.HmacSHA256(process.env.FTX_PRIV_KEY, payload)
-        .toString(CryptoJS.enc.Hex);
+const fetch = async (market) => {
+    if (!market) {
+        market = marketName;
+    }
+    const path = `/futures/${market}/mark_candles?resolution=${resolution}&limit=${limit}`;
 
     const resp = await axios({
-        method: 'get',
+        method,
         url: `https://ftx.com/api${path}`,
         headers: {
-            'FTX-KEY': process.env.FTX_KEY,
-            'FTX-TX': ts.toString(),
-            'FTX-SIGN': signature,
+            'content-type': 'application/json',
+            Accept: 'application/json',
         },
     });
-    console.log(resp.status);
-    console.log(resp.data);
+    return resp.data.result;
 };
 
-main()
-    .then(() => process.exit(0))
+fetch()
+    .then((result) => {
+        console.log(result);
+        process.exit(0);
+    })
     .catch((error) => {
-        console.error(error);
+        console.error(error.response.status);
+        console.error(error.response.statusText);
+        console.error(error.response.data);
         process.exit(1);
     });
+
+module.exports = fetch;
