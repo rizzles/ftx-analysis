@@ -20,7 +20,7 @@ const fetch = async (market) => {
             Accept: 'application/json',
         },
     });
-    return resp.data.result;
+    return resp.data.result.reverse();
 };
 
 fetch()
