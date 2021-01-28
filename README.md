@@ -1,0 +1,1 @@
+## FTX Technical Analysis
